@@ -11,7 +11,7 @@ export const createServersEmbed = async (
     queues.set(getQueueId(message.channel as TextChannel), servers);
     await paginate<ServerModel>(message, {
         limit: 2,
-        embedGenerator: async (servers, index) => {
+        embedGenerator: async (servers) => {
             const embed = new MessageEmbed();
             embed
                 .setTitle(
