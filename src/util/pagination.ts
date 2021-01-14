@@ -6,8 +6,6 @@ import {
     User,
 } from "discord.js";
 
-export const queues = new Map<string, unknown[]>();
-
 export const getQueueId = (channel: TextChannel) =>
     `${channel.guild.id}-${channel.id}`;
 
@@ -16,6 +14,7 @@ export const paginate = async <T>(
     opts: {
         limit?: number;
         embedGenerator: (value: T[], index: number) => Promise<MessageEmbed>;
+        queues: Map<string, unknown[]>
     }
 ) => {
     let currentPage = 0;
@@ -72,12 +71,12 @@ export const paginate = async <T>(
 export const paginateEmbed = async <T>(
     channel: TextChannel,
     embedGenerator: (values: T[], index: number) => Promise<MessageEmbed>,
-    opts: { limit?: number }
+    opts: { limit?: number; queues: Map<string, unknown[]> }
 ) => {
     const embeds: MessageEmbed[] = [];
     const id = getQueueId(channel);
-    if (!queues.has(id)) queues.set(id, []);
-    const queue = queues.get(id);
+    if (!opts.queues.has(id)) opts.queues.set(id, []);
+    const queue = opts.queues.get(id);
     if (!opts.limit) opts.limit = 3;
     let k = opts.limit;
     for (let i = 0; i < queue.length; i += opts.limit) {

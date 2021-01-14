@@ -1,6 +1,6 @@
 import { findUser, ptero } from "../modules/ptero";
 import { Command } from "../util/command";
-import { createServersEmbed } from "../util/embed";
+import { createServersEmbed, createUsersEmbed } from "../util/embed";
 import { filter } from "../util/utils";
 
 export default {
@@ -35,6 +35,9 @@ export default {
                             args[2]
                         );
                     }
+                case "users":
+                    const users = await ptero.getUsers();
+                    return await createUsersEmbed(msg, users);
                 default:
                     return msg.channel.send("Invalid command category.");
             }

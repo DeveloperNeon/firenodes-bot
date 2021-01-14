@@ -1,16 +1,20 @@
 import { Message, MessageEmbed, TextChannel } from "discord.js";
-import { ServerModel } from "pterodactyl.js";
-import { findUserById, ptero } from "../modules/ptero";
-import { getQueueId, paginate, queues } from "./pagination";
+import { ServerModel, UserModel } from "pterodactyl.js";
+import { findUserById } from "../modules/ptero";
+import { getQueueId, paginate } from "./pagination";
+
+const users = new Map<string, UserModel[]>();
+const servers = new Map<string, ServerModel[]>();
 
 export const createServersEmbed = async (
     message: Message,
-    servers: ServerModel[],
+    data: ServerModel[],
     owner?: string
 ) => {
-    queues.set(getQueueId(message.channel as TextChannel), servers);
+    servers.set(getQueueId(message.channel as TextChannel), data);
     await paginate<ServerModel>(message, {
         limit: 2,
+        queues: servers,
         embedGenerator: async (servers) => {
             const embed = new MessageEmbed();
             embed
@@ -29,13 +33,48 @@ export const createServersEmbed = async (
                         inline: true,
                     },
                     {
-                        name: "Updated At",
-                        value: s.updatedAt.toLocaleDateString(),
+                        name: "Server ID",
+                        value: s.identifier,
                         inline: true,
                     },
                     {
                         name: "Egg",
                         value: s.egg,
+                        inline: true,
+                    },
+                ]);
+            }
+            return embed;
+        },
+    });
+};
+
+export const createUsersEmbed = async (
+    message: Message,
+    data: UserModel[]
+) => {
+    users.set(getQueueId(message.channel as TextChannel), data);
+    await paginate<UserModel>(message, {
+        limit: 2,
+        queues: users,
+        embedGenerator: async (servers) => {
+            const embed = new MessageEmbed();
+            embed
+                .setTitle(
+                    "Users List"
+                )
+                .setColor("green");
+            for (let s of servers) {
+                embed.addFields([
+                    { name: "Full Name", value: s.fullName },
+                    {
+                        name: "User ID",
+                        value: s.id,
+                        inline: true,
+                    },
+                    {
+                        name: "Username",
+                        value: s.username,
                         inline: true,
                     },
                 ]);
